@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AG Grid Nested Columns Example</title>
+  <script src="https://cdn.jsdelivr.net/npm/ag-grid-community/dist/ag-grid-community.min.noStyle.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-grid.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/ag-grid-community/styles/ag-theme-alpine.css" rel="stylesheet">
+  <style>
+    html, body, #myGrid {
+      height: 100%;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+  <div id="myGrid" class="ag-theme-alpine"></div>  <script>
+    const dates = [
+      "2025-05-05", "2025-05-06", "2025-05-07", "2025-05-08", "2025-05-09", "2025-05-10", "2025-05-11",
+      "2025-05-12", "2025-05-13", "2025-05-14", "2025-05-15", "2025-05-16", "2025-05-17", "2025-05-18"
+    ];
+
+    function getWeekStart(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      const diff = d.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is Sunday
+      const monday = new Date(d.setDate(diff));
+      return monday.toISOString().split('T')[0];
+    }
+
+    function generateNestedColumns(dates, metric) {
+      const months = {};
+      dates.forEach(dateStr => {
+        const date = new Date(dateStr);
+        const month = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+        const weekStart = getWeekStart(date);
+        const dow = date.toLocaleString('default', { weekday: 'short' });
+
+        months[month] = months[month] || {};
+        months[month][weekStart] = months[month][weekStart] || [];
+        months[month][weekStart].push({
+          headerName: dow,
+          field: `${metric}_${dateStr}`,
+          editable: metric !== "required_fte",
+          valueGetter: metric === "required_fte" ? function(params) {
+            const vol = params.data[`volume_${dateStr}`];
+            const aht = params.data[`aht_minutes_${dateStr}`];
+            const hrs = params.data[`scheduled_hours_${dateStr}`];
+            return vol && aht && hrs ? (vol * aht / 60 / hrs).toFixed(2) : null;
+          } : undefined
+        });
+      });
+
+      return Object.entries(months).map(([month, weeks]) => ({
+        headerName: month,
+        children: Object.entries(weeks).map(([week, days]) => ({
+          headerName: `Week of ${week}`,
+          children: days
+        }))
+      }));
+    }
+
+    const columnDefs = [
+      { headerName: "Volume", children: generateNestedColumns(dates, "volume") },
+      { headerName: "AHT (min)", children: generateNestedColumns(dates, "aht_minutes") },
+      { headerName: "Scheduled Hours", children: generateNestedColumns(dates, "scheduled_hours") },
+      { headerName: "Required FTE", children: generateNestedColumns(dates, "required_fte") }
+    ];
+
+    const rowData = [
+      {
+        id: 1,
+        volume_2025_05_05: 100, volume_2025_05_06: 110, volume_2025_05_07: 105,
+        aht_minutes_2025_05_05: 4, aht_minutes_2025_05_06: 4.5, aht_minutes_2025_05_07: 4.2,
+        scheduled_hours_2025_05_05: 6, scheduled_hours_2025_05_06: 6, scheduled_hours_2025_05_07: 6
+      }
+    ];
+
+    const gridOptions = {
+      columnDefs: columnDefs.flat(),
+      rowData,
+      defaultColDef: {
+        resizable: true,
+        minWidth: 100
+      },
+      onCellValueChanged: (event) => {
+        console.log("Changed: ", event.data);
+        // AJAX call to Django could go here
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const gridDiv = document.querySelector('#myGrid');
+      new agGrid.Grid(gridDiv, gridOptions);
+    });
+  </script></body>
+</html>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flowin – Build Your Site in Seconds</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .wave {
+      background: linear-gradient(to bottom, #dbeafe 0%, #93c5fd 100%);
+      clip-path: ellipse(150% 100% at 50% 0%);
+    }
+  </style>
+</head>
+<body class="bg-blue-50 text-gray-800 min-h-screen flex flex-col">
+
+  <!-- Wave banner -->
+  <div class="wave p-8 text-center text-white">
+    <h1 class="text-4xl font-bold tracking-tight">🌊 Welcome to Flowin</h1>
+    <p class="mt-2 text-lg font-light">The fastest way from idea to live site</p>
+  </div>
+
+  <!-- Choose a mode -->
+  <div class="flex-1 flex items-center justify-center p-6">
+    <div class="grid gap-6 sm:grid-cols-2 max-w-4xl w-full">
+      <a href="https://editor.flowin.one?mode=ai" class="block rounded-xl bg-white shadow-lg hover:shadow-2xl transition p-6 text-center border border-indigo-100">
+        <h2 class="text-xl font-semibold text-indigo-600 mb-2">🧠 AI Mode</h2>
+        <p>Describe your site — Flowin AI builds it for you using ChatGPT.</p>
+      </a>
+      <a href="https://editor.flowin.one?mode=manual" class="block rounded-xl bg-white shadow-lg hover:shadow-2xl transition p-6 text-center border border-indigo-100">
+        <h2 class="text-xl font-semibold text-pink-600 mb-2">⌨️ Manual Mode</h2>
+        <p>Paste your HTML/CSS/JS directly and publish instantly.</p>
+      </a>
+    </div>
+  </div>
+
+  <footer class="text-center text-sm text-gray-500 p-4 mt-auto">
+    Made with ❤️ and ☕ by the Flowin team
+  </footer>
+</body>
+</html>

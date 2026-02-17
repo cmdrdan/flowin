@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 Calendar</title>
+</head>
+
+<body>
+    <h1>2025 Calendar</h1>
+
+    <table border="1">
+        <tr>
+            <th>Date</th>
+            <th>Event</th>
+        </tr>
+        <tr>
+            <td>June 2025</td>
+            <td><input type="text" id="juneEvent"></td>
+        </tr>
+        <tr>
+            <td>July 2025</td>
+            <td><input type="text" id="julyEvent"></td>
+        </tr>
+        <tr>
+            <td>August 2025</td>
+            <td><input type="text" id="augustEvent"></td>
+        </tr>
+        <tr>
+            <td>September 2025</td>
+            <td><input type="text" id="septemberEvent"></td>
+        </tr>
+        <tr>
+            <td>October 2025</td>
+            <td><input type="text" id="octoberEvent"></td>
+        </tr>
+        <tr>
+            <td>November 2025</td>
+            <td><input type="text" id="novemberEvent"></td>
+        </tr>
+        <tr>
+            <td>December 2025</td>
+            <td><input type="text" id="decemberEvent"></td>
+        </tr>
+    </table>
+
+    <button onclick="saveEvents()">Save Events</button>
+
+    <script>
+        function saveEvents() {
+            const events = {
+                June: document.getElementById('juneEvent').value,
+                July: document.getElementById('julyEvent').value,
+                August: document.getElementById('augustEvent').value,
+                September: document.getElementById('septemberEvent').value,
+                October: document.getElementById('octoberEvent').value,
+                November: document.getElementById('novemberEvent').value,
+                December: document.getElementById('decemberEvent').value
+            };
+
+            const csv = Object.keys(events).map(key => key + ',' + events[key]).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '2025_events.csv';
+            a.click();
+        }
+    </script>
+</body>
+
+</html>
