@@ -1,1 +1,5 @@
 *.save
+.env
+flowin-api/venv/
+__pycache__/
+*.pyc

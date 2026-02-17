@@ -1,2 +1,9 @@
 fastapi
 uvicorn
+openai
+pydantic
+slowapi
+python-dotenv
+supabase
+stripe
+PyJWT
