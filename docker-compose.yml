@@ -1,5 +1,6 @@
 services:
   db:
+    restart: unless-stopped
     image: postgres:16-alpine
     environment:
       POSTGRES_USER: flowin
@@ -16,6 +17,7 @@ services:
       retries: 5
 
   api:
+    restart: unless-stopped
     build: ./flowin-api
     env_file: ./flowin-api/.env
     volumes:
@@ -27,11 +29,12 @@ services:
         condition: service_healthy
 
   nginx:
-    build: ./nginx
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
     volumes:
       - sites_data:/var/www/flowin-sites:ro
-      - ./flowin/www/flowin.one:/var/www/flowin.one:ro
-      - ./flowin/www/editor.flowin.one:/var/www/editor.flowin.one:ro
       - /etc/letsencrypt:/etc/letsencrypt:ro
     ports:
       - "80:80"
