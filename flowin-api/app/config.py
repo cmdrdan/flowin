@@ -12,6 +12,8 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     jwt_expiry_hours: int = 72
     turnstile_secret: str = ""
+    cloudflare_zone_id: str = ""
+    cloudflare_api_token: str = ""
 
     class Config:
         env_file = ".env"
