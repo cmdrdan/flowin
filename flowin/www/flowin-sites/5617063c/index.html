@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pomodoro Timer</title>
+
+    <style>
+body {
+  font-family: sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  transition: background-color 0.3s ease;
+}
+
+body.work-mode {
+  background-color: #f0f0f0;
+}
+
+body.break-mode {
+  background-color: #e0f7fa;
+}
+
+.timer-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  border-radius: 10px;
+  padding: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+  width: 80%;
+  max-width: 500px;
+  box-sizing: border-box;
+}
+
+.timer-container.work-mode {
+  background-color: #fff;
+}
+
+.timer-container.break-mode {
+  background-color: #fff;
+}
+
+
+.timer {
+  font-family: 'Arial Black', sans-serif;
+  font-size: 90px;
+  margin-top: 20px;
+  margin-bottom: 30px;
+  color: #333;
+  letter-spacing: -5px;
+  text-shadow: 2px 2px 3px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+@media screen and (max-width: 600px) {
+  .timer {
+    font-size: 70px;
+  }
+}
+
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  margin-bottom: 15px;
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.inputs-container {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+.controls .input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 0;
+  margin-bottom: 0;
+  width: 48%;
+  box-sizing: border-box;
+}
+
+.controls label {
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+  font-size: 0.9em;
+  display: block;
+  text-align: left;
+}
+
+
+.controls button {
+  padding: 12px 24px;
+  font-size: 18px;
+  margin: 5px 0;
+  cursor: pointer;
+  border: none;
+  border-radius: 10px;
+  background-color: #007bff;
+  color: #fff;
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease;
+  width: 100%;
+  box-sizing: border-box;
+  display: block;
+  text-align: center;
+}
+
+.controls button:hover {
+  background-color: #0056b3;
+}
+
+.controls button:active {
+  background-color: #004080;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
+  transform: translateY(1px);
+}
+
+/* Specific styling for the reset button to make it outline */
+#reset {
+  background-color: transparent; /* Make the background transparent */
+  border: 2px solid #007bff; /* Add a border */
+  color: #007bff; /* Change text color to match the border */
+}
+
+#reset:hover {
+  background-color: rgba(0, 123, 255, 0.1); /* Light background on hover for better feedback */
+  color: #007bff; /* Keep text color the same on hover */
+}
+
+#reset:active {
+  background-color: rgba(0, 123, 255, 0.2); /* Slightly darker background on active */
+  color: #007bff; /* Keep text color the same on active */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
+  transform: translateY(1px);
+}
+
+
+input[type="number"] {
+  padding: 10px;
+  font-size: 18px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin: 0;
+  width: 100%;
+  text-align: center;
+  border-color: #aaa;
+  box-sizing: border-box;
+}
+
+input[type="number"]:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  outline: none;
+}
+
+.message {
+  margin-top: 30px;
+  font-size: 1.2em;
+  color: #333;
+  text-align: center;
+}
+    </style>
+  </head>
+  <body class="work-mode">
+    <div class="timer-container work-mode">
+      <div class="timer">25:00</div>
+      <div class="controls">
+        <div class="inputs-container">
+          <div class="input-group">
+            <label for="workTime">Work (min)</label>
+            <input type="number" id="workTime" value="25" min="1" aria-label="Work time in minutes"/>
+          </div>
+          <div class="input-group">
+            <label for="breakTime">Break (min)</label>
+            <input type="number" id="breakTime" value="5" min="1" aria-label="Break time in minutes"/>
+          </div>
+        </div>
+        <div class="button-group">
+          <button id="start">Start</button>
+          <button id="pause">Pause</button>
+          <button id="reset">Reset</button>
+        </div>
+      </div>
+      <div class="message">Time to focus!</div>
+    </div>
+
+    <script>
+const timerDisplay = document.querySelector(".timer");
+const startButton = document.getElementById("start");
+const pauseButton = document.getElementById("pause");
+const resetButton = document.getElementById("reset");
+const workTimeInput = document.getElementById("workTime");
+const breakTimeInput = document.getElementById("breakTime");
+const messageDisplay = document.querySelector(".message");
+const body = document.body;
+const timerContainer = document.querySelector(".timer-container");
+
+let workTime = 25;
+let breakTime = 5;
+let timeLeft;
+let timerInterval;
+let isPaused = false;
+let isWorkTime = true;
+let previousTime = 0;
+
+
+workTimeInput.addEventListener("change", (e) => {
+  workTime = parseInt(e.target.value);
+  if (!isWorkTime) {
+    isWorkTime = true;
+    updateTimeLeft();
+    isWorkTime = false;
+  } else {
+    updateTimeLeft();
+  }
+});
+
+breakTimeInput.addEventListener("change", (e) => {
+  breakTime = parseInt(e.target.value);
+  if (isWorkTime) {
+    isWorkTime = false;
+    updateTimeLeft();
+    isWorkTime = true;
+  } else {
+    updateTimeLeft();
+  }
+});
+
+startButton.addEventListener("click", () => {
+  if (timerInterval) return;
+  isPaused = false;
+  startTimer();
+});
+
+pauseButton.addEventListener("click", () => {
+  isPaused = true;
+  clearInterval(timerInterval);
+  timerInterval = null;
+});
+
+resetButton.addEventListener("click", () => {
+  isPaused = true;
+  clearInterval(timerInterval);
+  timerInterval = null;
+  isWorkTime = true;
+  setWorkModeVisuals();
+  updateTimeLeft();
+  messageDisplay.textContent = "Ready to focus!";
+});
+
+function startTimer() {
+  if (isPaused) return;
+
+  timerInterval = setInterval(() => {
+    if (timeLeft > 0) {
+      timeLeft--;
+      updateTimerDisplay();
+    } else {
+      clearInterval(timerInterval);
+      playSound();
+      timerInterval = null;
+      isWorkTime = !isWorkTime;
+      updateTimeLeft();
+      if (isWorkTime) {
+        setWorkModeVisuals();
+        messageDisplay.textContent = "Time to focus!";
+      } else {
+        setBreakModeVisuals();
+        messageDisplay.textContent = "Time for a break!";
+      }
+      startTimer();
+    }
+  }, 1000);
+}
+
+function updateTimeLeft() {
+  timeLeft = isWorkTime ? workTime * 60 : breakTime * 60;
+  updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const currentTime = minutes * 60 + seconds;
+
+  if (currentTime !== previousTime) {
+        animateTimerDigits(minutes, seconds);
+        previousTime = currentTime;
+  }
+  else{
+        displayTime(minutes, seconds);
+  }
+}
+
+function animateTimerDigits(minutes, seconds) {
+    displayTime(minutes, seconds);
+}
+
+
+function displayTime(minutes, seconds) {
+    timerDisplay.textContent = `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+}
+
+
+function playSound() {
+  const audio = new Audio("https://www.soundjay.com/buttons/sounds/beep-01a.mp3");
+  audio.play();
+}
+
+
+function setWorkModeVisuals() {
+  body.classList.remove('break-mode');
+  body.classList.add('work-mode');
+  timerContainer.classList.remove('break-mode');
+  timerContainer.classList.add('work-mode');
+}
+
+function setBreakModeVisuals() {
+  body.classList.remove('work-mode');
+  body.classList.add('break-mode');
+  timerContainer.classList.remove('work-mode');
+  timerContainer.classList.add('break-mode');
+}
+
+
+isWorkTime = true;
+updateTimeLeft();
+setWorkModeVisuals();
+    </script>
+  </body>
+</html>

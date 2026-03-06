@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emilia's Unicorn Adventure</title>
+<style>
+    body {
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+        background-color: #fce4ec;
+        color: #4a148c;
+        text-align: center;
+    }
+    h1 {
+        color: #880e4f;
+    }
+    p {
+        font-size: 1.2em;
+        line-height: 1.6;
+    }
+    button {
+        background-color: #ab47bc;
+        color: white;
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        cursor: pointer;
+        margin-top: 20px;
+    }
+    button:hover {
+        background-color: #7b1fa2;
+    }
+</style>
+</head>
+<body>
+    <h1>Emilia's Unicorn Adventure</h1>
+    <p>Welcome to the magical world of unicorns! Emilia is on an adventure and needs your help to make decisions.</p>
+    <button onclick="path1()">Start Adventure</button>
+
+    <script>
+        function path1() {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>Emilia meets a friendly unicorn named Sparkle. What would you like to do next?</p>
+                <button onclick="path2a()">Go for a ride</button>
+                <button onclick="path2b()">Play hide and seek</button>
+            `;
+        }
+
+        function path2a() {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>Emilia and Sparkle soar through the skies and find a hidden rainbow waterfall. Should they explore it?</p>
+                <button onclick="path3a()">Explore the waterfall</button>
+                <button onclick="path3b()">Keep flying</button>
+            `;
+        }
+
+        function path2b() {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>Emilia and Sparkle play hide and seek in a magical forest. Should they keep playing or look for treasures?</p>
+                <button onclick="path3c()">Continue playing</button>
+                <button onclick="path3d()">Search for treasures</button>
+            `;
+        }
+
+        function path3a() {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>Emilia and Sparkle find a hidden cave behind the waterfall. What do they do next?</p>
+                <button onclick="end('You found a treasure chest full of magical crystals! Great job!')">Open the cave</button>
+                <button onclick="end('The cave seems too dark and scary. Let's fly away!')">Fly away</button>
+            `;
+        }
+
+        function path3b() {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>Emilia and Sparkle fly higher and see a floating island. Should they visit the island?</p>
+                <button onclick="end('The island is full of friendly fairies. What a magical discovery!')">Visit the island</button>
+                <button onclick="end('The island looks too far. Let's explore closer areas.')">Explore closer areas</button>
+            `;
+        }
+
+        function path3c() {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>Emilia and Sparkle have so much fun playing hide and seek! It's now time to...</p>
+                <button onclick="end('Have a magical tea party!')">Have a tea party</button>
+                <button onclick="end('Practice their unicorn dance moves!')">Dance together</button>
+            `;
+        }
+
+        function path3d() {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>Emilia and Sparkle discover a chest full of treasures. What do they find inside?</p>
+                <button onclick="end('A magical bracelet that grants wishes!')">Magical bracelet</button>
+                <button onclick="end('A map to the hidden unicorn kingdom!')">Treasure map</button>
+            `;
+        }
+
+        function end(message) {
+            document.body.innerHTML = `
+                <h1>Emilia's Unicorn Adventure</h1>
+                <p>${message}</p>
+                <button onclick="location.reload()">Play again</button>
+            `;
+        }
+    </script>
+</body>
+</html>

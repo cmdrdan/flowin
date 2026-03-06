@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flowin Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-white to-indigo-50 min-h-screen text-gray-800">
+  <nav class="flex items-center justify-between px-6 py-3 bg-white shadow-sm">
+    <a href="/" class="text-xl font-bold text-indigo-700">Flowin</a>
+    <div id="auth-container"></div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-3xl font-bold text-indigo-700">My Sites</h1>
+      <a href="/index.html?mode=ai" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition">
+        + New Site
+      </a>
+    </div>
+
+    <div id="sites-loading" class="text-center py-12 text-gray-400">Loading your sites...</div>
+    <div id="sites-empty" class="hidden text-center py-16">
+      <p class="text-gray-400 text-lg mb-4">You haven't created any sites yet.</p>
+      <a href="/index.html?mode=ai" class="px-6 py-3 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition">
+        Create Your First Site
+      </a>
+    </div>
+    <div id="sites-grid" class="hidden grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+  </main>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script>window.TURNSTILE_SITE_KEY = '0x4AAAAAACm9X_EtjM6OTfQo';</script>
+  <script src="auth.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

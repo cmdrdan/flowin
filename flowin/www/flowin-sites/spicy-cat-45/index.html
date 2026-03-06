@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritzetti Calendar</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="email"],
+        button {
+            padding: 10px;
+            margin: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #3498db;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        #calendar {
+            /* Add calendar styling here */
+            width: 80%;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Ritzetti Calendar</h1>
+        <div id="login-area">
+            <input type="email" id="email" placeholder="Enter your email">
+            <button id="login-button">Sign In</button>
+        </div>
+        <div id="calendar">
+            <!-- Calendar content will be dynamically loaded here -->
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script>
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const SITE_ID = 'YOUR_SITE_ID';
+
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        document.getElementById('login-button').addEventListener('click', async () => {
+            const { user, session, error } = await supabase.auth.signIn({
+                email: document.getElementById('email').value
+            }, {
+                redirectTo: 'https://yourwebsite.com'
+            });
+
+            if (error) {
+                console.error('Error signing in:', error.message);
+            }
+        });
+
+        // Function to fetch and display calendar data
+        const fetchCalendarData = async () => {
+            // Fetch calendar data from Supabase events table
+            const { data, error } = await supabase
+                .from('events')
+                .select('*')
+                .eq('site_id', SITE_ID);
+
+            if (error) {
+                console.error('Error fetching calendar data:', error.message);
+                return;
+            }
+
+            // Render calendar data in the UI
+            const calendarElement = document.getElementById('calendar');
+            calendarElement.innerHTML = data.map(event => `
+                <div>
+                    <h3>${event.title}</h3>
+                    <p>${event.description}</p>
+                    <p>Date: ${event.date}</p>
+                </div>
+            `).join('');
+        };
+
+        fetchCalendarData();
+    </script>
+</body>
+
+</html>

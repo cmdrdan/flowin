@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Family Calendar</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+    }
+    header {
+        background-color: #333;
+        color: #fff;
+        text-align: center;
+        padding: 10px;
+    }
+    main {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 10px;
+        background-color: #fff;
+        border-radius: 5px;
+    }
+    .event {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px 0;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>Family Calendar</h1>
+</header>
+<main>
+    <div id="calendar"></div>
+</main>
+<script>
+    const SUPABASE_URL = 'https://joosxsxvgtwwtdzibcbi.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impvb3N4c3h2Z3R3d3RkemliY2JpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkzMDI4MDAsImV4cCI6MjA3NDg3ODgwMH0.kkQG8JqGJb4ucke4Jgwy9YHSWOSrXRS5f7p37nC749E';
+    const SITE_ID = 'YOUR_SITE_ID_FROM_SUPABASE';
+
+    // Fetch calendar events
+    fetch(`${SUPABASE_URL}/sites/${SITE_ID}/events`)
+        .then(response => response.json())
+        .then(data => {
+            const calendarElement = document.getElementById('calendar');
+            data.forEach(event => {
+                const eventElement = document.createElement('div');
+                eventElement.classList.add('event');
+                eventElement.innerHTML = `
+                    <h3>${event.title}</h3>
+                    <p>${event.details}</p>
+                    <p>${event.starts_at} - ${event.ends_at}</p>
+                    <p>Location: ${event.location}</p>
+                `;
+                calendarElement.appendChild(eventElement);
+            });
+        })
+        .catch(error => console.error(error));
+</script>
+</body>
+</html>

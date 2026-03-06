@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: flowin
+      POSTGRES_PASSWORD: flowin
+      POSTGRES_DB: flowin
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flowin"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  api:
+    build: ./flowin-api
+    env_file: ./flowin-api/.env
+    volumes:
+      - sites_data:/var/www/flowin-sites
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  nginx:
+    build: ./nginx
+    volumes:
+      - sites_data:/var/www/flowin-sites:ro
+      - ./flowin/www/flowin.one:/var/www/flowin.one:ro
+      - ./flowin/www/editor.flowin.one:/var/www/editor.flowin.one:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  sites_data:
