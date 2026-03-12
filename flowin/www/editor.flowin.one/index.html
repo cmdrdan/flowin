@@ -217,6 +217,7 @@
   <script>window.TURNSTILE_SITE_KEY = '0x4AAAAAACm9X_EtjM6OTfQo';</script>
   <script src="loading.js?v=2"></script>
   <script src="auth.js?v=2"></script>
+  <script src="demo.js?v=2"></script>
   <script src="preflight.js?v=2"></script>
   <script src="app.js?v=2"></script>
   <script src="ads.js?v=2"></script>
@@ -264,7 +265,12 @@
     const refineInput = document.getElementById('refine-input');
     refineBtn?.addEventListener('click', async () => {
       if (!refineInput?.value.trim() || !window.editor) return;
-      if (!isLoggedIn()) { showToast('Please sign in first', 'error'); return; }
+      if (!isLoggedIn()) {
+        const instruction = refineInput.value.trim();
+        refineInput.value = '';
+        runDemoRefine(instruction);
+        return;
+      }
       const instruction = refineInput.value.trim();
       refineInput.value = '';
       showLoading();

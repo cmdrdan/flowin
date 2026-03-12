@@ -1516,7 +1516,7 @@ async function publishSite() {
   }
 
   if (!isLoggedIn()) {
-    setResult('Please sign in before publishing.', 'error');
+    showDemoPublishCTA();
     return;
   }
 
@@ -1608,7 +1608,7 @@ async function generateSite(event) {
   }
 
   if (!isLoggedIn()) {
-    setResult('Please sign in before generating.', 'error');
+    runDemoGeneration(prompt);
     return;
   }
 
