@@ -5,6 +5,7 @@ from typing import Optional
 from app.middleware.rate_limit import rate_limit_publish
 from app.services.sites import create_site
 from app.utils.cloudflare import purge_cache
+from app.services.activity import log_activity
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -36,5 +37,6 @@ async def publish(
         raise HTTPException(status_code=500, detail=str(e))
 
     logger.info("Published site: %s by user %s", site["slug"], user["id"])
+    log_activity("site_publish", user_id=user["id"], user_email=user["email"], entity_type="site", entity_id=site["slug"])
     await purge_cache(site["slug"])
     return Response(content=site["url"], media_type="text/plain")

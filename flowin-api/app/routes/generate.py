@@ -1,7 +1,7 @@
 import json
 import logging
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel
 
 from app.middleware.rate_limit import rate_limit_generate
@@ -11,6 +11,13 @@ from app.services.ai import (
     analyze_html_for_enhancement, enhance_html, enhance_html_section,
 )
 from app.services.analyze import analyze_prompt
+from app.services.tiers import (
+    check_generation_allowed, increment_generation_count,
+    get_user_with_tier,
+)
+from app.services import email as email_svc
+from app.db import get_conn
+from app.services.activity import log_activity
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -34,6 +41,45 @@ class EnhanceInput(BaseModel):
     html: str
 
 
+def _check_tier_or_error(user_id: int, is_new_site: bool = False):
+    allowed, error_code, message, upgrade_prompt = check_generation_allowed(
+        user_id, is_new_site=is_new_site
+    )
+    if not allowed:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": error_code,
+                "message": message,
+                "upgrade_prompt": upgrade_prompt,
+                "upgrade_url": "/pricing",
+            },
+        )
+
+
+def _log_generation(user_id: int, prompt: str, gen_type: str = "generate",
+                    tokens_in: int = 0, tokens_out: int = 0):
+    with get_conn() as conn:
+        cur = conn.cursor()
+        cur.execute(
+            """INSERT INTO generations (user_id, prompt, gen_type, tokens_in, tokens_out)
+               VALUES (%s, %s, %s, %s, %s)""",
+            (user_id, prompt[:2000], gen_type, tokens_in, tokens_out),
+        )
+
+
+async def _check_gen_limit_warning(user_id: int):
+    """Send email warning at 80% usage."""
+    user = get_user_with_tier(user_id)
+    if not user:
+        return
+    tier = user["tier"]
+    used = user["gens_used_this_month"]
+    limit = tier["max_gens_month"]
+    if limit > 0 and used == int(limit * 0.8):
+        await email_svc.send_generation_limit_warning(user["email"], used, limit)
+
+
 @router.post("/generate/analyze")
 async def analyze(input: AnalyzeInput, user: dict = Depends(get_current_user)):
     if not input.prompt.strip():
@@ -54,16 +100,28 @@ async def generate(input: PromptInput, user: dict = Depends(rate_limit_generate)
     if not input.prompt.strip():
         raise HTTPException(status_code=400, detail="Prompt cannot be empty")
 
+    _check_tier_or_error(user["id"])
+
     try:
         if input.stream:
+            # Increment count and log before streaming
+            increment_generation_count(user["id"])
+            _log_generation(user["id"], input.prompt, "generate")
             return StreamingResponse(
                 generate_html_stream(input.prompt),
                 media_type="text/plain",
             )
         html = generate_html(input.prompt)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("AI generation failed: %s", e)
         raise HTTPException(status_code=500, detail="AI generation failed")
+
+    increment_generation_count(user["id"])
+    _log_generation(user["id"], input.prompt, "generate")
+    await _check_gen_limit_warning(user["id"])
+    log_activity("generate", user_id=user["id"], user_email=user["email"], entity_type="generation", detail={"prompt": input.prompt[:200]})
 
     truncated = not html.rstrip().endswith("</html>")
     if truncated:
@@ -78,11 +136,20 @@ async def refine(input: RefineInput, user: dict = Depends(rate_limit_generate)):
     if not input.html.strip() or not input.instruction.strip():
         raise HTTPException(status_code=400, detail="Both html and instruction are required")
 
+    _check_tier_or_error(user["id"])
+
     try:
         html = refine_html(input.html, input.instruction)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("AI refinement failed: %s", e)
         raise HTTPException(status_code=500, detail="AI refinement failed")
+
+    increment_generation_count(user["id"])
+    _log_generation(user["id"], input.instruction, "refine")
+    await _check_gen_limit_warning(user["id"])
+    log_activity("refine", user_id=user["id"], user_email=user["email"], entity_type="generation", detail={"instruction": input.instruction[:200]})
 
     logger.info("Refined HTML for user %s", user["id"])
     return {"html": html}
@@ -94,8 +161,12 @@ async def enhance(input: EnhanceInput, user: dict = Depends(rate_limit_generate)
     if not input.html.strip():
         raise HTTPException(status_code=400, detail="HTML content is required")
 
+    _check_tier_or_error(user["id"])
+
     try:
         analysis = analyze_html_for_enhancement(input.html)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error("Enhancement analysis failed: %s", e)
         raise HTTPException(status_code=500, detail="Enhancement analysis failed")
@@ -111,7 +182,6 @@ async def enhance(input: EnhanceInput, user: dict = Depends(rate_limit_generate)
         total = len(admin_sections)
 
         for i, section in enumerate(admin_sections):
-            # Send progress event
             progress = {
                 "type": "progress",
                 "section": section["label"],
@@ -137,6 +207,10 @@ async def enhance(input: EnhanceInput, user: dict = Depends(rate_limit_generate)
             "sections_added": completed,
         }
         yield f"data: {json.dumps(done)}\n\n"
+
+    increment_generation_count(user["id"])
+    _log_generation(user["id"], "enhance", "enhance")
+    log_activity("enhance", user_id=user["id"], user_email=user["email"], entity_type="generation", detail={"sections": len(admin_sections)})
 
     logger.info("Enhancing %d sections for user %s", len(admin_sections), user["id"])
     return StreamingResponse(sse_stream(), media_type="text/event-stream")

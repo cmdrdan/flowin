@@ -1661,6 +1661,24 @@ async function generateSite(event) {
 
     const responseText = await res.text();
     if (!res.ok) {
+      // Handle tier limit errors with upgrade prompt
+      if (res.status === 403) {
+        try {
+          const errData = JSON.parse(responseText);
+          const detail = errData.detail || errData;
+          if (detail.upgrade_url || detail.upgrade_prompt) {
+            hideLoading();
+            setResult(detail.message || 'Generation limit reached.', 'error');
+            // Open pricing modal if on dashboard, or redirect
+            if (typeof handleUpgrade === 'function') {
+              handleUpgrade();
+            } else {
+              window.location.href = '/dashboard.html?upgrade=true';
+            }
+            return;
+          }
+        } catch (_) {}
+      }
       throw new Error(responseText || `Generation failed with status ${res.status}`);
     }
 

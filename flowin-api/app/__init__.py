@@ -4,7 +4,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.db import init_pool, close_pool, run_migrations
-from app.routes import auth, publish, generate, sites, templates, domains, analytics, credentials
+from app.routes import (
+    auth, publish, generate, sites, templates,
+    domains, analytics, credentials, payments, admin, users, internal,
+)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,7 +23,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["*"],
         allow_credentials=True,
     )
@@ -33,6 +36,10 @@ def create_app() -> FastAPI:
     app.include_router(domains.router)
     app.include_router(analytics.router)
     app.include_router(credentials.router)
+    app.include_router(payments.router)
+    app.include_router(admin.router)
+    app.include_router(users.router)
+    app.include_router(internal.router)
 
     @app.on_event("startup")
     async def startup():

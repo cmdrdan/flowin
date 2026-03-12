@@ -22,6 +22,7 @@ services:
     env_file: ./flowin-api/.env
     volumes:
       - sites_data:/var/www/flowin-sites
+      - api_logs:/var/log/flowin
     ports:
       - "8000:8000"
     depends_on:
@@ -45,3 +46,4 @@ services:
 volumes:
   pgdata:
   sites_data:
+  api_logs:

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Flowin Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .tab-btn.active { border-bottom: 2px solid #4f46e5; color: #4f46e5; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+  <nav class="flex items-center justify-between px-6 py-3 bg-white shadow-sm">
+    <div class="flex items-center gap-4">
+      <a href="/" class="text-xl font-bold text-indigo-700">Flowin</a>
+      <span class="text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">ADMIN</span>
+      <a href="/dashboard.html" class="text-sm text-gray-500 hover:text-indigo-600">Dashboard</a>
+    </div>
+    <div id="auth-container"></div>
+  </nav>
+
+  <main class="max-w-6xl mx-auto px-4 py-6">
+    <!-- Overview Cards -->
+    <div id="overview" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-6"></div>
+
+    <!-- Tabs -->
+    <div class="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
+      <button class="tab-btn active px-4 py-2 text-sm font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap" data-panel="users">Users</button>
+      <button class="tab-btn px-4 py-2 text-sm font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap" data-panel="tiers">Tiers</button>
+      <button class="tab-btn px-4 py-2 text-sm font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap" data-panel="settings">Settings</button>
+      <button class="tab-btn px-4 py-2 text-sm font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap" data-panel="waitlist">Waitlist</button>
+      <button class="tab-btn px-4 py-2 text-sm font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap" data-panel="genlog">Gen Log</button>
+      <button class="tab-btn px-4 py-2 text-sm font-semibold text-gray-500 border-b-2 border-transparent whitespace-nowrap" data-panel="activity">Activity Log</button>
+    </div>
+
+    <!-- Panels -->
+    <div id="panel-users" class="panel active"></div>
+    <div id="panel-tiers" class="panel"></div>
+    <div id="panel-settings" class="panel"></div>
+    <div id="panel-waitlist" class="panel"></div>
+    <div id="panel-genlog" class="panel"></div>
+    <div id="panel-activity" class="panel"></div>
+
+    <!-- User Detail Modal -->
+    <div id="user-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div class="bg-white rounded-2xl shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto relative">
+        <button onclick="closeUserModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-xl z-10">&times;</button>
+        <div id="user-modal-content" class="p-6"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <script>window.TURNSTILE_SITE_KEY = '0x4AAAAAACm9X_EtjM6OTfQo';</script>
+  <script src="auth.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

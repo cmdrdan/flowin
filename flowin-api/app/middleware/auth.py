@@ -1,5 +1,5 @@
 import jwt
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.config import settings
@@ -28,11 +28,27 @@ async def get_current_user(
     with get_conn() as conn:
         cur = conn.cursor()
         cur.execute(
-            "SELECT id, email, display_name FROM users WHERE id = %s", (user_id,)
+            "SELECT id, email, display_name, is_admin FROM users WHERE id = %s", (user_id,)
         )
         row = cur.fetchone()
 
     if not row:
         raise HTTPException(status_code=401, detail="User not found")
 
-    return {"id": row[0], "email": row[1], "display_name": row[2]}
+    return {"id": row[0], "email": row[1], "display_name": row[2], "is_admin": row[3]}
+
+
+async def require_admin(user: dict = Depends(get_current_user)) -> dict:
+    if not user.get("is_admin"):
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return user
+
+
+async def require_internal_token(
+    x_internal_token: str = Header(None),
+) -> bool:
+    if not settings.internal_token:
+        raise HTTPException(status_code=501, detail="Internal token not configured")
+    if x_internal_token != settings.internal_token:
+        raise HTTPException(status_code=403, detail="Invalid internal token")
+    return True
